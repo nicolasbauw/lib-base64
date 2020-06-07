@@ -44,8 +44,8 @@ impl Base64 for String {
         let sextets = octal
             .as_bytes()
             .chunks(2)
-            .map(|s| u8::from_str_radix(str::from_utf8(s).unwrap(), 8).unwrap())
-            .collect::<Vec<u8>>();
+            .map(|s| usize::from_str_radix(str::from_utf8(s).unwrap(), 8).unwrap())
+            .collect::<Vec<usize>>();
 
         // For dev and debug
         #[cfg(debug_assertions)]
@@ -62,7 +62,7 @@ impl Base64 for String {
         let mut result = String::new();
 
         for i in 0..(sextets.len() - padding) {
-            result.push_str(&table[sextets[i] as usize..(sextets[i] + 1) as usize]);
+            result.push_str(&table[sextets[i]..(sextets[i] + 1)]);
         }
         match padding {
             1 => result.push_str("="),
