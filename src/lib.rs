@@ -12,11 +12,12 @@ impl Base64 for String {
         let mut i = 0;
 
         // The number of full sextets to process
-        let blockstoprocess = match a.len() % 3 {
+        let inputlenmod = a.len() % 3;
+        let blockstoprocess = match inputlenmod {
             0 => a.len(),
-            _ => a.len() - a.len() % 3,
+            _ => a.len() - inputlenmod,
         };
-        let padding = match a.len() % 3 {
+        let padding = match inputlenmod {
             0 => 0,
             _ => 3 - (a.len() - blockstoprocess),
         };
