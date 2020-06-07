@@ -1,3 +1,8 @@
+/// Yet another base64 encoding library, which implements the encode() method for the String type.
+/// My goals were:
+/// - to write it myself, for the fun ;-)
+/// - to use it in an interactive command line string encoding utility that fits my needs.
+
 use std::str;
 
 pub trait Base64 {
@@ -5,6 +10,14 @@ pub trait Base64 {
 }
 
 impl Base64 for String {
+    /// Encodes a String with the base64 scheme
+    /// 
+    /// Example:
+    /// ```
+    /// use lib_base64::Base64;
+    /// let s = String::from("Test");
+    /// assert_eq!("VGVzdA==", s.encode())
+    /// ```
     fn encode(&self) -> String {
         let a = &self.as_bytes();
 
