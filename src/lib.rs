@@ -79,6 +79,9 @@ mod tests {
     use crate::Base64;
     #[test]
     fn encode_works() {
-        assert_eq!("SmUgdCdhaW1lIG1hIGNow6lyaWU=", String::from("Je t'aime ma chérie").encode());
+        assert_eq!(
+            "SmUgdCdhaW1lIG1hIGNow6lyaWU=",
+            String::from("Je t'aime ma chérie").encode()
+        );
     }
 }
