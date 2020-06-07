@@ -3,6 +3,12 @@ name = "lib-base64"
 version = "0.1.0"
 authors = ["Nicolas BAUW <nbauw@hotmail.com>"]
 edition = "2018"
+description = "Yet another base64 encoding library, which implements the encode() method for the String type."
+keywords = ["base64", "encoding", "method", "string", "decoding"]
+categories = ["encoding"]
+license = "GPL-3.0"
+repository = "https://github.com/nicolasbauw/lib-base64"
+readme = "README.md"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
