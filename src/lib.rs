@@ -75,8 +75,9 @@ impl Base64 for String {
 
 #[cfg(test)]
 mod tests {
+    use crate::Base64;
     #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
+    fn encode_works() {
+        assert_eq!("SmUgdCdhaW1lIG1hIGNow6lyaWU=", String::from("Je t'aime ma chérie").encode());
     }
 }
