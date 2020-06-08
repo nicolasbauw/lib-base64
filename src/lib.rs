@@ -1,7 +1,7 @@
-/// Yet another base64 encoding library, which implements the encode() method for the String type.
-/// My goals were:
-/// - to write it myself, for the fun ;-)
-/// - to use it in an interactive command line string encoding utility that fits my needs.
+//! Yet another base64 encoding library, which implements the encode() method for the String type.
+//! My goals were:
+//! - to write it myself
+//! - to use it in an interactive command line string encoding utility that fits my needs.
 
 use std::str;
 
