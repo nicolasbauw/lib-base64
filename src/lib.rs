@@ -1,6 +1,7 @@
 //! Yet another base64 encoding library, which implements the encode() and decode() methods for the String type.
 //! My goals were:
 //! - to write it myself
+//! - to encode / decode with padding
 //! - to use it in an interactive command line string encoding utility that fits my needs.
 
 use std::str;
