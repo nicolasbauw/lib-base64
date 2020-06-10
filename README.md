@@ -1,6 +1,6 @@
 # lib-base64
 
-Yet another base64 encoding library, which implements the encode() method for the String type.
+Yet another base64 encoding library, which implements the encode() and decode() methods for the String type.
 My goals were:
 - to write it myself
 - to use it in an interactive command line string encoding utility that fits my needs.
