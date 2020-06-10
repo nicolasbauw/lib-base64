@@ -7,11 +7,12 @@ use std::str;
 
 pub trait Base64 {
     fn encode(&self) -> String;
+    fn decode(&self) -> String;
 }
 
 impl Base64 for String {
     /// Encodes a String with the base64 scheme
-    /// 
+    ///
     /// Example:
     /// ```
     /// use lib_base64::Base64;
@@ -85,6 +86,81 @@ impl Base64 for String {
         };
         result
     }
+
+    /// Decodes a String encoded with the base64 scheme
+    ///
+    /// Example:
+    /// ```
+    /// use lib_base64::Base64;
+    /// let s = String::from("VGVzdA==");
+    /// assert_eq!("Test", s.decode())
+    /// ```
+    fn decode(&self) -> String {
+        let table = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+        let mut encoded_data = self.clone();
+        let padding = encoded_data.matches("=").count();
+
+        // replaces padding characters by characters decoded as zero
+        for _ in 0..padding {
+            encoded_data.pop();
+        }
+
+        for _ in 0..padding {
+            encoded_data.push_str("A");
+        }
+
+        // Retrieves octal indexes of encoded characters
+        let octal = encoded_data
+            .chars()
+            .map(|c| format!("{:02o}", table.find(c).unwrap()))
+            .collect::<Vec<String>>();
+
+        // Gathers the 4 sextets (24 bits) collection
+        let mut octalsextets = Vec::new();
+        let mut n = 0;
+        while n < encoded_data.len() {
+            let mut s = String::new();
+            for i in 0..4 {
+                s.push_str(octal[n + i].as_str());
+            }
+            n += 4;
+            octalsextets.push(s);
+        }
+
+        // Decodes the 4 sextets to 3 bytes
+        let decimal = octalsextets
+            .iter()
+            .map(|s| usize::from_str_radix(s, 8).unwrap())
+            .collect::<Vec<usize>>();
+
+        // Extracts the significants bytes of the usize to a vector of bytes
+        let mut bytes: Vec<u8> = Vec::new();
+        for i in 0..decimal.len() {
+            let a = decimal[i].to_be_bytes();
+            bytes.push(a[5]);
+            bytes.push(a[6]);
+            bytes.push(a[7]);
+        }
+
+        // Removes padding bytes inserted for decoding
+        for _ in 0..padding {
+            bytes.pop();
+        }
+
+        // For dev and debug
+        #[cfg(debug_assertions)]
+        {
+            println!("Encoded data length : {}", encoded_data.len());
+            println!("24 bits blocks to process : {}", encoded_data.len() / 4);
+            println!("Padding : {}", padding);
+            println!("Octal indexes of encoded characters : {:?}", octal);
+            println!("Gathering sextets 4 by 4 : {:?}", octalsextets);
+            println!("Decoded data (4 sextets to 3 bytes) : {:x?}", decimal);
+            println!("Decoded bytes : {:x?}", &bytes);
+        }
+
+        String::from_utf8(bytes).unwrap()
+    }
 }
 
 #[cfg(test)]
@@ -95,6 +171,14 @@ mod tests {
         assert_eq!(
             "SmUgdCdhaW1lIG1hIGNow6lyaWU=",
             String::from("Je t'aime ma chérie").encode()
+        );
+    }
+
+    #[test]
+    fn decode_works() {
+        assert_eq!(
+            "Joyeux anniversaire !",
+            String::from("Sm95ZXV4IGFubml2ZXJzYWlyZSAh").decode()
         );
     }
 }
