@@ -4,13 +4,37 @@
 //! - to encode / decode with padding
 //! - to use it in an interactive command line string encoding utility that fits my needs.
 
-use std::str;
+use std::{fmt, str};
 
-static TABLE:&str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+static TABLE: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub enum Base64Error {
+    // Invalid input data length (for decoder)
+    InvalidDataLenght,
+    // Badly encoded input data (for decoder)
+    InvalidBase64Data,
+}
+
+impl fmt::Display for Base64Error {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("decoding error: ")?;
+        f.write_str(match self {
+            Base64Error::InvalidDataLenght => "Invalid input data length",
+            Base64Error::InvalidBase64Data => "Invalid base64 data",
+        })
+    }
+}
+
+impl From<std::string::FromUtf8Error> for Base64Error {
+    fn from(_e: std::string::FromUtf8Error) -> Base64Error {
+        Base64Error::InvalidBase64Data
+    }
+}
 
 pub trait Base64 {
     fn encode(&self) -> String;
-    fn decode(&self) -> String;
+    fn decode(&self) -> Result<String, Base64Error>;
 }
 
 impl Base64 for String {
@@ -95,13 +119,15 @@ impl Base64 for String {
     /// ```
     /// use lib_base64::Base64;
     /// let s = String::from("VGVzdA==");
-    /// assert_eq!("Test", s.decode())
+    /// assert_eq!(Ok(String::from("Test")), s.decode())
     /// ```
-    fn decode(&self) -> String {
+    fn decode(&self) -> Result<String, Base64Error> {
         let mut encoded_data = self.clone();
         let padding = encoded_data.matches("=").count();
 
-        if encoded_data.len() % 4 != 0 { return format!("Bad encoded string !") };
+        if encoded_data.len() % 4 != 0 {
+            return Err(Base64Error::InvalidDataLenght);
+        };
 
         // replaces padding characters by characters decoded as zero
         for _ in 0..padding {
@@ -162,12 +188,8 @@ impl Base64 for String {
             println!("Decoded bytes : {:x?}", &bytes);
         }
 
-        let result = match String::from_utf8(bytes) {
-            Ok(r) => r,
-            Err(_) => format!("Bad encoded string !"),
-
-        };
-        result
+        let result = String::from_utf8(bytes)?;
+        Ok(result)
     }
 }
 
@@ -185,7 +207,7 @@ mod tests {
     #[test]
     fn decode_works() {
         assert_eq!(
-            "Joyeux anniversaire !",
+            Ok(String::from("Joyeux anniversaire !")),
             String::from("Sm95ZXV4IGFubml2ZXJzYWlyZSAh").decode()
         );
     }
