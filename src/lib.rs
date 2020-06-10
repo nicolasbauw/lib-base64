@@ -101,6 +101,8 @@ impl Base64 for String {
         let mut encoded_data = self.clone();
         let padding = encoded_data.matches("=").count();
 
+        if encoded_data.len() % 4 != 0 { return format!("Bad encoded string !") };
+
         // replaces padding characters by characters decoded as zero
         for _ in 0..padding {
             encoded_data.pop();
@@ -113,7 +115,7 @@ impl Base64 for String {
         // Retrieves octal indexes of encoded characters
         let octal = encoded_data
             .chars()
-            .map(|c| format!("{:02o}", TABLE.find(c).unwrap()))
+            .map(|c| format!("{:02o}", TABLE.find(c).unwrap_or(65)))
             .collect::<Vec<String>>();
 
         // Gathers the 4 sextets (24 bits) collection
@@ -160,7 +162,12 @@ impl Base64 for String {
             println!("Decoded bytes : {:x?}", &bytes);
         }
 
-        String::from_utf8(bytes).unwrap()
+        let result = match String::from_utf8(bytes) {
+            Ok(r) => r,
+            Err(_) => format!("Bad encoded string !"),
+
+        };
+        result
     }
 }
 
