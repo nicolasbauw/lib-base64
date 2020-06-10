@@ -5,6 +5,8 @@
 
 use std::str;
 
+static TABLE:&str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
 pub trait Base64 {
     fn encode(&self) -> String;
     fn decode(&self) -> String;
@@ -73,11 +75,10 @@ impl Base64 for String {
             println!("Decimal encoded data : {:?}", sextets);
         }
 
-        let table = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
         let mut result = String::new();
 
         for i in 0..(sextets.len() - padding) {
-            result.push_str(&table[sextets[i]..(sextets[i] + 1)]);
+            result.push_str(&TABLE[sextets[i]..(sextets[i] + 1)]);
         }
         match padding {
             1 => result.push_str("="),
@@ -96,7 +97,6 @@ impl Base64 for String {
     /// assert_eq!("Test", s.decode())
     /// ```
     fn decode(&self) -> String {
-        let table = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
         let mut encoded_data = self.clone();
         let padding = encoded_data.matches("=").count();
 
@@ -112,7 +112,7 @@ impl Base64 for String {
         // Retrieves octal indexes of encoded characters
         let octal = encoded_data
             .chars()
-            .map(|c| format!("{:02o}", table.find(c).unwrap()))
+            .map(|c| format!("{:02o}", TABLE.find(c).unwrap()))
             .collect::<Vec<String>>();
 
         // Gathers the 4 sextets (24 bits) collection
