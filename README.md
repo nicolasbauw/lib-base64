@@ -1,5 +1,8 @@
 # lib-base64
 
+[![Current Crates.io Version](https://img.shields.io/crates/v/lib-base64.svg)](https://crates.io/crates/lib-base64)
+[![Downloads badge](https://img.shields.io/crates/d/lib-base64.svg)](https://crates.io/crates/lib-base64)
+
 Yet another base64 encoding library, which implements the encode() and decode() methods for the String type.
 My goals were:
 - to write it myself
