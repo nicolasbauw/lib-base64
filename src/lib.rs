@@ -10,9 +10,9 @@ static TABLE: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz012345
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Base64Error {
-    // Invalid input data length (for decoder)
+    /// Invalid input data length (must be a multiple of 4)
     InvalidDataLenght,
-    // Badly encoded input data (for decoder)
+    /// Incorrectly encoded input data
     InvalidBase64Data,
 }
 
