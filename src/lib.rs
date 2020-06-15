@@ -122,7 +122,7 @@ impl Base64 for String {
     /// assert_eq!(Ok(String::from("Test")), s.decode())
     /// ```
     fn decode(&self) -> Result<String, Base64Error> {
-        let mut encoded_data = self.clone();
+        let mut encoded_data = self.to_owned();
         let padding = encoded_data.matches("=").count();
 
         if encoded_data.len() % 4 != 0 {
@@ -150,6 +150,7 @@ impl Base64 for String {
         while n < encoded_data.len() {
             let mut s = String::new();
             for i in 0..4 {
+                if octal[n + i] == "101" { return Err(Base64Error::InvalidBase64Data) }
                 s.push_str(octal[n + i].as_str());
             }
             n += 4;
