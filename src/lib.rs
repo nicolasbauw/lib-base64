@@ -212,4 +212,20 @@ mod tests {
             String::from("Sm95ZXV4IGFubml2ZXJzYWlyZSAh").decode()
         );
     }
+
+    #[test]
+    fn datalength_check() {
+        assert_eq!(
+            Err(crate::Base64Error::InvalidDataLenght),
+            String::from("TWF").decode()
+        );
+    }
+
+    #[test]
+    fn validb64data_check() {
+        assert_eq!(
+            Err(crate::Base64Error::InvalidBase64Data),
+            String::from("TWF$").decode()
+        );
+    }
 }
