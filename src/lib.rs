@@ -3,7 +3,7 @@
 //! - to encode / decode with padding
 //! - to use it in an interactive command line string encoding utility that fits my needs.
 
-use std::{fmt, str};
+use std::{fmt, error::Error, str};
 
 static TABLE: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
@@ -14,6 +14,8 @@ pub enum Base64Error {
     /// Incorrectly encoded input data
     InvalidBase64Data,
 }
+
+impl Error for Base64Error {}
 
 impl fmt::Display for Base64Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
