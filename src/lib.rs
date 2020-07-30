@@ -48,7 +48,7 @@ impl Base64 for String {
     /// assert_eq!("VGVzdA==", s.encode())
     /// ```
     fn encode(&self) -> String {
-        let a = &self.as_bytes();
+        let a = self.as_bytes();
 
         let mut octal = String::new();
         let mut i = 0;
