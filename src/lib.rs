@@ -5,7 +5,7 @@
 
 use std::{fmt, error::Error, str};
 
-static TABLE: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+const TABLE: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Base64Error {
