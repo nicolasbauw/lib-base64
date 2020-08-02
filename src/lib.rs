@@ -84,7 +84,7 @@ impl Base64 for String {
         let sextets = octal
             .as_bytes()
             .chunks(2)
-            .map(|s| usize::from_str_radix(str::from_utf8(s).unwrap(), 8).unwrap())
+            .map(|s| usize::from_str_radix(str::from_utf8(s).unwrap_or_default(), 8).unwrap_or_default())
             .collect::<Vec<usize>>();
 
         // For dev and debug
@@ -158,7 +158,7 @@ impl Base64 for String {
         // Decodes the 4 sextets to 3 bytes
         let decimal = octalsextets
             .iter()
-            .map(|s| usize::from_str_radix(s, 8).unwrap())
+            .map(|s| usize::from_str_radix(s, 8).unwrap_or_default())
             .collect::<Vec<usize>>();
 
         // Extracts the significants bytes of the usize to a vector of bytes
