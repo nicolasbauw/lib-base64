@@ -33,6 +33,18 @@ impl From<std::string::FromUtf8Error> for Base64Error {
     }
 }
 
+impl From<std::str::Utf8Error> for Base64Error {
+    fn from(_e: std::str::Utf8Error) -> Base64Error {
+        Base64Error::EncodingError
+    }
+}
+
+impl From<std::num::ParseIntError> for Base64Error {
+    fn from(_e: std::num::ParseIntError) -> Base64Error {
+        Base64Error::EncodingError
+    }
+}
+
 pub trait Base64 {
     fn encode(&self) -> Result<String, Base64Error>;
     fn decode(&self) -> Result<String, Base64Error>;
@@ -84,26 +96,14 @@ impl Base64 for String {
         };
 
         // Converting octal output to a decimal index vector
-        let s_sextets: Result<Vec<_>, _> = octal
+        let sextets = octal
             .as_bytes()
             .chunks(2)
             .map(|s| str::from_utf8(s))
-            .collect();
-
-        let str_sextets = match s_sextets {
-            Ok(s) => s,
-            Err(_) => return Err(Base64Error::EncodingError)
-        };
-
-        let u_sextets: Result<Vec<_>, _> = str_sextets
+            .collect::<Result<Vec<_>, _>>()?
             .into_iter()
             .map(|u| usize::from_str_radix(u, 8))
-            .collect();
-
-        let sextets = match u_sextets {
-            Ok(s) => s,
-            Err(_) => return Err(Base64Error::EncodingError)
-        };
+            .collect::<Result<Vec<_>, _>>()?;
 
         // For dev and debug
         #[cfg(debug_assertions)]
@@ -157,7 +157,7 @@ impl Base64 for String {
         // Retrieves octal indexes of encoded characters
         let octal = encoded_data
             .chars()
-            .map(|c| format!("{:02o}", TABLE.find(c).unwrap_or(65)))
+            .map(|c| format!("{:02o}", TABLE.find(c).unwrap_or(65))) // 65 for invalid base64 input detection
             .collect::<Vec<String>>();
 
         // Gathers the 4 sextets (24 bits) collection
@@ -166,7 +166,7 @@ impl Base64 for String {
         while n < encoded_data.len() {
             let mut s = String::new();
             for i in 0..4 {
-                if octal[n + i] == "101" { return Err(Base64Error::InvalidBase64Data) }
+                if octal[n + i] == "101" { return Err(Base64Error::InvalidBase64Data) } // 65 decimal = 101 octal
                 s.push_str(octal[n + i].as_str());
             }
             n += 4;
