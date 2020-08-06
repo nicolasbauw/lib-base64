@@ -18,11 +18,11 @@ impl Error for Base64Error {}
 
 impl fmt::Display for Base64Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str("Base64 : ")?;
+        f.write_str("Base64 error : ")?;
         f.write_str(match self {
-            Base64Error::InvalidDataLenght => "Decoding error : Invalid input data length",
-            Base64Error::InvalidBase64Data => "Decoding error : Invalid base64 data",
-            Base64Error::EncodingError => "Encoding error"
+            Base64Error::InvalidDataLenght => "Invalid input data length",
+            Base64Error::InvalidBase64Data => "Invalid base64 data",
+            Base64Error::EncodingError => "Cannot convert input data"
         })
     }
 }
