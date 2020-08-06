@@ -22,7 +22,7 @@ impl fmt::Display for Base64Error {
         f.write_str(match self {
             Base64Error::InvalidDataLenght => "Invalid input data length",
             Base64Error::InvalidBase64Data => "Invalid base64 data",
-            Base64Error::EncodingError => "Cannot convert input data"
+            Base64Error::EncodingError => "Cannot encode input data"
         })
     }
 }
