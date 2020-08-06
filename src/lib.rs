@@ -84,18 +84,26 @@ impl Base64 for String {
         };
 
         // Converting octal output to a decimal index vector
-        let str_sextets = octal
+        let s_sextets: Result<Vec<_>, _> = octal
             .as_bytes()
             .chunks(2)
-            .map(|s| str::from_utf8(s).unwrap_or_default())
-            .collect::<Vec<&str>>();
+            .map(|s| str::from_utf8(s))
+            .collect();
 
-        let sextets = str_sextets
+        let str_sextets = match s_sextets {
+            Ok(s) => s,
+            Err(_) => return Err(Base64Error::EncodingError)
+        };
+
+        let u_sextets: Result<Vec<_>, _> = str_sextets
             .into_iter()
-            .map(|u| usize::from_str_radix(u, 8).unwrap_or_default())
-            .collect::<Vec<usize>>();
+            .map(|u| usize::from_str_radix(u, 8))
+            .collect();
 
-            //.map(|s| usize::from_str_radix(str::from_utf8(s).unwrap_or_default(), 8).unwrap_or_default())
+        let sextets = match u_sextets {
+            Ok(s) => s,
+            Err(_) => return Err(Base64Error::EncodingError)
+        };
 
         // For dev and debug
         #[cfg(debug_assertions)]
