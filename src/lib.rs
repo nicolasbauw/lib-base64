@@ -45,6 +45,12 @@ impl From<std::num::ParseIntError> for Base64Error {
     }
 }
 
+impl From<Box<dyn Error>> for Base64Error {
+    fn from(_e: Box<dyn Error>) -> Base64Error {
+        Base64Error::EncodingError
+    }
+}
+
 pub trait Base64 {
     fn encode(&self) -> Result<String, Base64Error>;
     fn decode(&self) -> Result<String, Base64Error>;
@@ -97,9 +103,10 @@ impl Base64 for String {
             .as_bytes()
             .chunks(2)
             .map(|s| str::from_utf8(s))
-            .collect::<Result<Vec<_>, _>>()?
-            .into_iter()
-            .map(|u| usize::from_str_radix(u, 8))
+            .map(|u| {
+                u.map_err::<Box<dyn Error>, _>(|e| e.into())
+                    .and_then(|u| usize::from_str_radix(u, 8).map_err(|e| e.into()))
+            })
             .collect::<Result<Vec<_>, _>>()?;
 
         // For dev and debug
