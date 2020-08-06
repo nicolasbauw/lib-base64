@@ -10,16 +10,19 @@ pub enum Base64Error {
     InvalidDataLenght,
     /// Incorrectly encoded input data
     InvalidBase64Data,
+    /// Encoding error
+    EncodingError
 }
 
 impl Error for Base64Error {}
 
 impl fmt::Display for Base64Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str("Decoding error : ")?;
+        f.write_str("Base64 : ")?;
         f.write_str(match self {
-            Base64Error::InvalidDataLenght => "Invalid input data length",
-            Base64Error::InvalidBase64Data => "Invalid base64 data",
+            Base64Error::InvalidDataLenght => "Decoding error : Invalid input data length",
+            Base64Error::InvalidBase64Data => "Decoding error : Invalid base64 data",
+            Base64Error::EncodingError => "Encoding error"
         })
     }
 }
@@ -31,7 +34,7 @@ impl From<std::string::FromUtf8Error> for Base64Error {
 }
 
 pub trait Base64 {
-    fn encode(&self) -> String;
+    fn encode(&self) -> Result<String, Base64Error>;
     fn decode(&self) -> Result<String, Base64Error>;
 }
 
@@ -42,9 +45,9 @@ impl Base64 for String {
     /// ```
     /// use lib_base64::Base64;
     /// let s = String::from("Test");
-    /// assert_eq!("VGVzdA==", s.encode())
+    /// assert_eq!(Ok(String::from("VGVzdA==")), s.encode())
     /// ```
-    fn encode(&self) -> String {
+    fn encode(&self) -> Result<String, Base64Error> {
         let a = self.as_bytes();
 
         let mut octal = String::new();
@@ -81,11 +84,18 @@ impl Base64 for String {
         };
 
         // Converting octal output to a decimal index vector
-        let sextets = octal
+        let str_sextets = octal
             .as_bytes()
             .chunks(2)
-            .map(|s| usize::from_str_radix(str::from_utf8(s).unwrap_or_default(), 8).unwrap_or_default())
+            .map(|s| str::from_utf8(s).unwrap_or_default())
+            .collect::<Vec<&str>>();
+
+        let sextets = str_sextets
+            .into_iter()
+            .map(|u| usize::from_str_radix(u, 8).unwrap_or_default())
             .collect::<Vec<usize>>();
+
+            //.map(|s| usize::from_str_radix(str::from_utf8(s).unwrap_or_default(), 8).unwrap_or_default())
 
         // For dev and debug
         #[cfg(debug_assertions)]
@@ -108,7 +118,7 @@ impl Base64 for String {
             2 => result.push_str("=="),
             _ => {}
         };
-        result
+        Ok(result)
     }
 
     /// Decodes a String encoded with the base64 scheme
@@ -198,7 +208,7 @@ mod tests {
     #[test]
     fn encode_works() {
         assert_eq!(
-            "SmUgdCdhaW1lIG1hIGNow6lyaWU=",
+            Ok(String::from("SmUgdCdhaW1lIG1hIGNow6lyaWU=")),
             String::from("Je t'aime ma chérie").encode()
         );
     }
