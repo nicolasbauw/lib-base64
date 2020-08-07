@@ -89,8 +89,7 @@ impl Base64 for String {
 
         match padding {
             1 => {
-                octal
-                    .push_str(format!("{:o}", u32::from_be_bytes([0, a[i], a[i + 1], 0])).as_str());
+                octal.push_str(format!("{:o}", u32::from_be_bytes([0, a[i], a[i + 1], 0])).as_str());
             }
             2 => {
                 octal.push_str(format!("{:o}", u32::from_be_bytes([0, a[i], 0, 0])).as_str());
@@ -108,17 +107,6 @@ impl Base64 for String {
                     .and_then(|u| usize::from_str_radix(u, 8).map_err(|e| e.into()))
             })
             .collect::<Result<Vec<_>, _>>()?;
-
-        // For dev and debug
-        #[cfg(debug_assertions)]
-        {
-            println!("Input as bytes : {:?}", a);
-            println!("Length of string to encode : {}", a.len());
-            println!("24 bits blocks to process : {}", blockstoprocess);
-            println!("Padding : {}", padding);
-            println!("Padded input as octal : {}", octal);
-            println!("Decimal encoded data : {:?}", sextets);
-        }
 
         let mut result = String::new();
 
@@ -195,18 +183,6 @@ impl Base64 for String {
         // Removes padding bytes inserted for decoding
         for _ in 0..padding {
             bytes.pop();
-        }
-
-        // For dev and debug
-        #[cfg(debug_assertions)]
-        {
-            println!("Encoded data length : {}", encoded_data.len());
-            println!("24 bits blocks to process : {}", encoded_data.len() / 4);
-            println!("Padding : {}", padding);
-            println!("Octal indexes of encoded characters : {:?}", octal);
-            println!("Gathering sextets 4 by 4 : {:?}", octalsextets);
-            println!("Decoded data (4 sextets to 3 bytes) : {:x?}", decimal);
-            println!("Decoded bytes : {:x?}", &bytes);
         }
 
         let result = String::from_utf8(bytes)?;
