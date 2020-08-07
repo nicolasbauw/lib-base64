@@ -1,4 +1,4 @@
-//! A base64 encoding and decoding library, which implements the encode() and decode() methods for the String type.
+//! A base64 (with padding) encoding and decoding library, which implements the encode() and decode() methods for the String type.
 
 use std::{fmt, error::Error, str};
 
