@@ -73,10 +73,7 @@ impl Base64 for String {
 
         // The number of full sextets to process
         let inputlenmod = a.len() % 3;
-        let blockstoprocess = match inputlenmod {
-            0 => a.len(),
-            _ => a.len() - inputlenmod,
-        };
+        let blockstoprocess = if inputlenmod == 0 { a.len() } else { a.len() - inputlenmod };
         let padding = if inputlenmod != 0 { 3 - (a.len() - blockstoprocess) } else { 0 };
 
         // Creating octal output from bytes converted to sextets (3 * 8 bytes = 24 bits = four sextets)
