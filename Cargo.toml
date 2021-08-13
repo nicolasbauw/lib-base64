@@ -1,12 +1,12 @@
 [package]
 name = "lib-base64"
-version = "2.0.1"
+version = "2.0.2"
 authors = ["Nicolas BAUW <nbauw@hotmail.com>"]
 edition = "2018"
 description = "A base64 (with padding) encoding and decoding library, which implements the encode() and decode() methods for the String type."
 keywords = ["base64", "encoding", "padding", "method", "string"]
 categories = ["encoding"]
-license = "GPL-3.0"
+license = "MIT"
 repository = "https://github.com/nicolasbauw/lib-base64"
 readme = "README.md"
 

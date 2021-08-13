@@ -18,4 +18,4 @@ let s = String::from("VGVzdA==");
 assert_eq!(Ok(String::from("Test")), s.decode())
 ```
 
-License: GPL-3.0
+License: MIT
