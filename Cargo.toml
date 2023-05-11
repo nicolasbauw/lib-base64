@@ -1,6 +1,6 @@
 [package]
 name = "lib-base64"
-version = "2.0.3"
+version = "2.0.4"
 authors = ["Nicolas BAUW <nbauw@hotmail.com>"]
 edition = "2021"
 description = "A base64 (with padding) encoding and decoding library, which implements the encode() and decode() methods for the String type."
