@@ -98,7 +98,7 @@ impl Base64 for String {
         let sextets = octal
             .as_bytes()
             .chunks(2)
-            .map(|s| str::from_utf8(s))
+            .map(str::from_utf8)
             .map(|u| {
                 u.map_err::<Box<dyn Error>, _>(|e| e.into())
                     .and_then(|u| usize::from_str_radix(u, 8).map_err(|e| e.into()))
@@ -111,7 +111,7 @@ impl Base64 for String {
             result.push_str(&TABLE[sextets[i]..(sextets[i] + 1)]);
         }
         match padding {
-            1 => result.push_str("="),
+            1 => result.push('='),
             2 => result.push_str("=="),
             _ => {}
         };
@@ -128,7 +128,7 @@ impl Base64 for String {
     /// ```
     fn decode(&self) -> Result<String, Base64Error> {
         let mut encoded_data = self.to_owned();
-        let padding = encoded_data.matches("=").count();
+        let padding = encoded_data.matches('=').count();
 
         if encoded_data.len() % 4 != 0 {
             return Err(Base64Error::InvalidDataLenght);
@@ -140,7 +140,7 @@ impl Base64 for String {
         }
 
         for _ in 0..padding {
-            encoded_data.push_str("A");
+            encoded_data.push('A');
         }
 
         // Retrieves octal indexes of encoded characters
