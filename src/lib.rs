@@ -1,6 +1,6 @@
 //! A base64 (with padding) encoding and decoding library, which implements the encode() and decode() methods for the String type.
 
-use std::{fmt, error::Error, str};
+use std::{error::Error, fmt, str};
 
 const TABLE: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
@@ -11,7 +11,7 @@ pub enum Base64Error {
     /// Incorrectly encoded input data
     InvalidBase64Data,
     /// Encoding error
-    EncodingError
+    EncodingError,
 }
 
 impl Error for Base64Error {}
@@ -22,7 +22,7 @@ impl fmt::Display for Base64Error {
         f.write_str(match self {
             Base64Error::InvalidDataLenght => "Invalid input data length",
             Base64Error::InvalidBase64Data => "Invalid base64 data",
-            Base64Error::EncodingError => "Cannot encode input data"
+            Base64Error::EncodingError => "Cannot encode input data",
         })
     }
 }
@@ -73,8 +73,16 @@ impl Base64 for String {
 
         // The number of full sextets to process
         let inputlenmod = a.len() % 3;
-        let blockstoprocess = if inputlenmod == 0 { a.len() } else { a.len() - inputlenmod };
-        let padding = if inputlenmod != 0 { 3 - (a.len() - blockstoprocess) } else { 0 };
+        let blockstoprocess = if inputlenmod == 0 {
+            a.len()
+        } else {
+            a.len() - inputlenmod
+        };
+        let padding = if inputlenmod != 0 {
+            3 - (a.len() - blockstoprocess)
+        } else {
+            0
+        };
 
         // Creating octal output from bytes converted to sextets (3 * 8 bytes = 24 bits = four sextets)
         while i < blockstoprocess {
@@ -86,7 +94,8 @@ impl Base64 for String {
 
         match padding {
             1 => {
-                octal.push_str(format!("{:o}", u32::from_be_bytes([0, a[i], a[i + 1], 0])).as_str());
+                octal
+                    .push_str(format!("{:o}", u32::from_be_bytes([0, a[i], a[i + 1], 0])).as_str());
             }
             2 => {
                 octal.push_str(format!("{:o}", u32::from_be_bytes([0, a[i], 0, 0])).as_str());
@@ -155,7 +164,9 @@ impl Base64 for String {
         while n < encoded_data.len() {
             let mut s = String::new();
             for i in 0..4 {
-                if octal[n + i] == "101" { return Err(Base64Error::InvalidBase64Data) } // 65 decimal = 101 octal
+                if octal[n + i] == "101" {
+                    return Err(Base64Error::InvalidBase64Data);
+                } // 65 decimal = 101 octal
                 s.push_str(octal[n + i].as_str());
             }
             n += 4;
