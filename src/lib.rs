@@ -198,6 +198,91 @@ impl Base64 for String {
     }
 }
 
+impl Base64 for Vec<u8> {
+    /// Encodes a Vec<u8> with the base64 scheme
+    ///
+    /// Example:
+    /// ```
+    /// use lib_base64::Base64;
+    /// let s = String::from("Test");
+    /// assert_eq!(Ok(String::from("VGVzdA==")), s.encode())
+    /// ```
+    fn encode(&self) -> Result<String, Base64Error> {
+        let a = self;
+        let table = TABLE.as_bytes();
+
+        let mut input_buffer = Vec::new();
+        let mut i = 0;
+
+        // The number of full sextets to process
+        let inputlenmod = a.len() % 3;
+        let blockstoprocess = if inputlenmod == 0 {
+            a.len()
+        } else {
+            a.len() - inputlenmod
+        };
+
+        let padding = if inputlenmod != 0 {
+            3 - (a.len() - blockstoprocess)
+        } else {
+            0
+        };
+
+        let mut base64_buffer: Vec<u8> = Vec::new();
+
+        // Creating octal output from bytes converted to sextets (3 * 8 bytes = 24 bits = four sextets)
+        // step 1 : put 3 bytes (24 bits) in a 32-bit word
+        while i < blockstoprocess {
+            input_buffer.push(u32::from_be_bytes([0, a[i], a[i + 1], a[i + 2]]));
+            i += 3;
+        }
+
+        match padding {
+            1 => {
+                input_buffer.push(u32::from_be_bytes([0, a[i], a[i + 1], 0]));
+            }
+            2 => {
+                input_buffer.push(u32::from_be_bytes([0, a[i], 0, 0]));
+            }
+            _ => {}
+        };
+
+        // step 2 : octal conversion (three bytes = four sextets)
+        i = 0;
+        while i < input_buffer.len() {
+            let t0 = ((input_buffer[i] & 0xFC0000) >> 18) as u8;
+            let t1 = ((input_buffer[i] & 0x3F000) >> 12) as u8;
+            let t2 = ((input_buffer[i] & 0xFC0) >> 6) as u8;
+            let t3 = (input_buffer[i] & 0x3F) as u8;
+            base64_buffer.push(table[t0 as usize]);
+            base64_buffer.push(table[t1 as usize]);
+            base64_buffer.push(table[t2 as usize]);
+            base64_buffer.push(table[t3 as usize]);
+            i = i + 1;
+        }
+
+        let mut result = String::from_utf8(base64_buffer)?;
+        match padding {
+            1 => {
+                result.pop();
+                result.push('=');
+            }
+            2 => {
+                result.pop();
+                result.pop();
+                result.push_str("==");
+            }
+            _ => {}
+        };
+
+        Ok(result)
+    }
+
+    fn decode(&self) -> Result<String, Base64Error> {
+        Ok(String::new())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::Base64;
@@ -207,6 +292,21 @@ mod tests {
             Ok(String::from("SmUgdCdhaW1lIG1hIGNow6lyaWU=")),
             String::from("Je t'aime ma chérie").encode()
         );
+    }
+
+    #[test]
+    fn encode_no_padding() {
+        assert_eq!(Ok(String::from("TWFu")), String::from("Man").encode());
+    }
+
+    #[test]
+    fn encode_one_padding() {
+        assert_eq!(Ok(String::from("TWE=")), String::from("Ma").encode());
+    }
+
+    #[test]
+    fn encode_two_padding() {
+        assert_eq!(Ok(String::from("TQ==")), String::from("M").encode());
     }
 
     #[test]
@@ -231,5 +331,29 @@ mod tests {
             Err(crate::Base64Error::InvalidBase64Data),
             String::from("TWF$").decode()
         );
+    }
+
+    #[test]
+    fn encode_u8_no_padding() {
+        let input: Vec<u8> = vec![0x4d, 0x61, 0x6e];
+        assert_eq!(Ok(String::from("TWFu")), input.encode());
+    }
+
+    #[test]
+    fn encode_u8_one_padding() {
+        let input: Vec<u8> = vec![0x4d, 0x61];
+        assert_eq!(Ok(String::from("TWE=")), input.encode());
+    }
+
+    #[test]
+    fn encode_u8_two_padding() {
+        let input: Vec<u8> = vec![0x4d];
+        assert_eq!(Ok(String::from("TQ==")), input.encode());
+    }
+
+    #[test]
+    fn encode_u8() {
+        let input: Vec<u8> = String::from("light work.").as_bytes().to_vec();
+        assert_eq!(Ok(String::from("bGlnaHQgd29yay4=")), input.encode());
     }
 }
