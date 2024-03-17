@@ -204,25 +204,22 @@ impl Base64 for Vec<u8> {
     /// Example:
     /// ```
     /// use lib_base64::Base64;
-    /// let s = String::from("Test");
-    /// assert_eq!(Ok(String::from("VGVzdA==")), s.encode())
+    /// let v = vec![0x4d, 0x61, 0x6e];
+    /// assert_eq!(Ok(String::from("TWFu")), v.encode())
     /// ```
     fn encode(&self) -> Result<String, Base64Error> {
         let table = TABLE.as_bytes();
 
         let mut input_buffer = Vec::new();
+        let l = self.len();
         let mut i = 0;
 
         // The number of full sextets to process
-        let inputlenmod = self.len() % 3;
-        let blockstoprocess = if inputlenmod == 0 {
-            self.len()
-        } else {
-            self.len() - inputlenmod
-        };
+        let inputlenmod = l % 3;
+        let blockstoprocess = if inputlenmod == 0 { l } else { l - inputlenmod };
 
         let padding = if inputlenmod != 0 {
-            3 - (self.len() - blockstoprocess)
+            3 - (l - blockstoprocess)
         } else {
             0
         };
