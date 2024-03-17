@@ -208,22 +208,21 @@ impl Base64 for Vec<u8> {
     /// assert_eq!(Ok(String::from("VGVzdA==")), s.encode())
     /// ```
     fn encode(&self) -> Result<String, Base64Error> {
-        let a = self;
         let table = TABLE.as_bytes();
 
         let mut input_buffer = Vec::new();
         let mut i = 0;
 
         // The number of full sextets to process
-        let inputlenmod = a.len() % 3;
+        let inputlenmod = self.len() % 3;
         let blockstoprocess = if inputlenmod == 0 {
-            a.len()
+            self.len()
         } else {
-            a.len() - inputlenmod
+            self.len() - inputlenmod
         };
 
         let padding = if inputlenmod != 0 {
-            3 - (a.len() - blockstoprocess)
+            3 - (self.len() - blockstoprocess)
         } else {
             0
         };
@@ -233,16 +232,16 @@ impl Base64 for Vec<u8> {
         // Creating octal output from bytes converted to sextets (3 * 8 bytes = 24 bits = four sextets)
         // step 1 : put 3 bytes (24 bits) in a 32-bit word
         while i < blockstoprocess {
-            input_buffer.push(u32::from_be_bytes([0, a[i], a[i + 1], a[i + 2]]));
+            input_buffer.push(u32::from_be_bytes([0, self[i], self[i + 1], self[i + 2]]));
             i += 3;
         }
 
         match padding {
             1 => {
-                input_buffer.push(u32::from_be_bytes([0, a[i], a[i + 1], 0]));
+                input_buffer.push(u32::from_be_bytes([0, self[i], self[i + 1], 0]));
             }
             2 => {
-                input_buffer.push(u32::from_be_bytes([0, a[i], 0, 0]));
+                input_buffer.push(u32::from_be_bytes([0, self[i], 0, 0]));
             }
             _ => {}
         };
