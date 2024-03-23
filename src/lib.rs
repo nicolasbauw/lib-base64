@@ -1,4 +1,4 @@
-//! A base64 (with padding) encoding and decoding library, which implements the encode() and decode() methods for the String type.
+//! A base64 (with padding) encoding and decoding library, which implements the encode() and decode() methods for the `String` and `Vec<u8>` types.
 
 use std::{error::Error, fmt, str};
 
@@ -57,7 +57,7 @@ pub trait Base64 {
 }
 
 impl Base64 for String {
-    /// Encodes a String with the base64 scheme
+    /// Encodes a `String` with the base64 scheme
     ///
     /// Example:
     /// ```
@@ -127,7 +127,7 @@ impl Base64 for String {
         Ok(result)
     }
 
-    /// Decodes a String encoded with the base64 scheme
+    /// Decodes a `String` encoded with the base64 scheme
     ///
     /// Example:
     /// ```
