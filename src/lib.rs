@@ -199,7 +199,7 @@ impl Base64 for String {
 }
 
 impl Base64 for Vec<u8> {
-    /// Encodes a Vec<u8> with the base64 scheme
+    /// Encodes a `Vec<u8>` with the base64 scheme
     ///
     /// Example:
     /// ```
@@ -274,6 +274,14 @@ impl Base64 for Vec<u8> {
         Ok(result)
     }
 
+    /// Decodes a `Vec<u8>` encoded with the base64 scheme
+    ///
+    /// Example:
+    /// ```
+    /// use lib_base64::Base64;
+    /// let s = vec![0x54, 0x57, 0x45, 0x3d];
+    /// assert_eq!(Ok(String::from("Ma")), s.decode())
+    /// ```
     fn decode(&self) -> Result<String, Base64Error> {
         let temp_string = self.to_owned();
         let mut encoded_data = String::from_utf8(temp_string)?;
