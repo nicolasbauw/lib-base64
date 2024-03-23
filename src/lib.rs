@@ -275,7 +275,66 @@ impl Base64 for Vec<u8> {
     }
 
     fn decode(&self) -> Result<String, Base64Error> {
-        Ok(String::new())
+        let temp_string = self.to_owned();
+        let mut encoded_data = String::from_utf8(temp_string)?;
+        let padding = encoded_data.matches('=').count();
+
+        if encoded_data.len() % 4 != 0 {
+            return Err(Base64Error::InvalidDataLenght);
+        };
+
+        // replaces padding characters by characters decoded as zero
+        for _ in 0..padding {
+            encoded_data.pop();
+        }
+
+        for _ in 0..padding {
+            encoded_data.push('A');
+        }
+
+        // Retrieves octal indexes of encoded characters
+        let octal = encoded_data
+            .chars()
+            .map(|c| format!("{:02o}", TABLE.find(c).unwrap_or(65))) // 65 for invalid base64 input detection
+            .collect::<Vec<String>>();
+
+        // Gathers the 4 sextets (24 bits) collection
+        let mut octalsextets = Vec::new();
+        let mut n = 0;
+        while n < encoded_data.len() {
+            let mut s = String::new();
+            for i in 0..4 {
+                if octal[n + i] == "101" {
+                    return Err(Base64Error::InvalidBase64Data);
+                } // 65 decimal = 101 octal
+                s.push_str(octal[n + i].as_str());
+            }
+            n += 4;
+            octalsextets.push(s);
+        }
+
+        // Decodes the 4 sextets to 3 bytes
+        let decimal = octalsextets
+            .iter()
+            .map(|s| usize::from_str_radix(s, 8))
+            .collect::<Result<Vec<_>, _>>()?;
+
+        // Extracts the significants bytes of the usize to a vector of bytes
+        let mut bytes: Vec<u8> = Vec::new();
+        for i in 0..decimal.len() {
+            let a = decimal[i].to_be_bytes();
+            bytes.push(a[5]);
+            bytes.push(a[6]);
+            bytes.push(a[7]);
+        }
+
+        // Removes padding bytes inserted for decoding
+        for _ in 0..padding {
+            bytes.pop();
+        }
+
+        let result = String::from_utf8(bytes)?;
+        Ok(result)
     }
 }
 
@@ -351,5 +410,31 @@ mod tests {
     fn encode_u8() {
         let input: Vec<u8> = String::from("light work.").as_bytes().to_vec();
         assert_eq!(Ok(String::from("bGlnaHQgd29yay4=")), input.encode());
+    }
+
+    #[test]
+    fn decode_u8() {
+        let input: Vec<u8> = vec![
+            0x62, 0x47, 0x6C, 0x6E, 0x61, 0x48, 0x51, 0x67, 0x64, 0x32, 0x39, 0x79,
+        ];
+        assert_eq!(Ok(String::from("light wor")), input.decode());
+    }
+
+    #[test]
+    fn decode_u8_one_padding() {
+        let input: Vec<u8> = vec![
+            0x62, 0x47, 0x6C, 0x6E, 0x61, 0x48, 0x51, 0x67, 0x64, 0x32, 0x39, 0x79, 0x61, 0x79,
+            0x34, 0x3D,
+        ];
+        assert_eq!(Ok(String::from("light work.")), input.decode());
+    }
+
+    #[test]
+    fn decode_u8_two_padding() {
+        let input: Vec<u8> = vec![
+            0x62, 0x47, 0x6C, 0x6E, 0x61, 0x48, 0x51, 0x67, 0x64, 0x32, 0x39, 0x79, 0x61, 0x77,
+            0x3D, 0x3D,
+        ];
+        assert_eq!(Ok(String::from("light work")), input.decode());
     }
 }
